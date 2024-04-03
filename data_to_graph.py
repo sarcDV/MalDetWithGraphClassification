@@ -3,6 +3,7 @@ import numpy as np
 import networkx as nx
 import pandas as pd
 import h5py
+import hashlib
 import  warnings
 warnings.filterwarnings('ignore')
 ## ---------------------------------------------------
@@ -70,7 +71,8 @@ def Data2Graph(folder, csvfile):
             file_ = os.path.join(path_, file)
             filename = os.path.basename(file_)
             print(f"Processing {filename}")
-            
+            with open(file_, 'rb') as binary_file:        
+                data = binary_file.read()
             # Convert binary data to graph
             converter = Binary2Graph(file_)
             graph_ = converter.bin2graph()
@@ -89,10 +91,13 @@ def Data2Graph(folder, csvfile):
             f[group_name].create_dataset("tdf", data=tdf.to_records(index=False))
             
             # Add label to the group based on filename matching with dflabel
-            matching_row = dflabel[dflabel["id"] == filename]
+            
+            md5_hash = hashlib.md5(data).hexdigest()
+            matching_row = dflabel[dflabel["md5"] == md5_hash]
+            print(matching_row)
             if not matching_row.empty:
                 list_value = matching_row["list"].iloc[0]
-                label = 0 if list_value.lower() in ["whitelist", "whitelist"] else 1
+                label = 0 if list_value.lower() in ["Whitelist", "whitelist"] else 1
                 f[group_name].attrs["label"] = label
 
     print(f"All data saved to {hdf5_file}")
