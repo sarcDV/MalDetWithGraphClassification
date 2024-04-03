@@ -9,37 +9,6 @@ import matplotlib.pyplot as plt
 
 warnings.filterwarnings('ignore')
 ## ---------------------------------------------------
-
-def number_to_hex_rgb(number):
-    # Ensure the number is within the valid range
-    number = max(0, min(255, number))
-
-    # Convert the number to a hexadecimal string
-    hex_color = f"#{hex(number)[2:].zfill(2)}{hex(number)[2:].zfill(2)}{hex(number)[2:].zfill(2)}"
-
-    return hex_color
-
-class AdjToGraph:
-    def __init__(self, adjmat):
-        self.adjmat = adjmat
-
-    def adj2graph(self):    
-            # Create an empty graph
-            G = nx.Graph()
-            # Add nodes
-            num_nodes = len(self.adjmat)
-            G.add_nodes_from(range(num_nodes))
-            # Add edges based on adjacency matrix
-            for i in range(num_nodes):
-                for j in range(i + 1, num_nodes):
-                    # if adjacency_matrix[i][j] != 0:
-                        # G.add_edge(i, j)
-                    G.add_edge(i, j, weight=self.adjmat[i,j])
-
-            # Return the constructed graph
-            return G
-    
-
 class BinaryPairListConverter:
     def __init__(self, file):
         self.file = file
@@ -70,24 +39,36 @@ class PairListToGraph:
             
         return G   
     
+class Binary2Graph:
+    def __init__(self, file):
+        self.file = file
+
+    def bin2graph(self):
+        converter = BinaryPairListConverter(file)
+        pairs = converter.bin2pair()
+        arrtograph = PairListToGraph(pairs)
+        G = arrtograph.pair2graph()
+        # print(G.number_of_edges())
+        c_graph, c_nodes = nx.dedensify(G, threshold=2)
+        # print(c_graph.number_of_edges())
+        # nx.write_gexf(c_graph, "file.gexf")
+        return c_graph
 
 def main():
-    Binary2ImgGlcmGraph(sys.argv[1])
+    Data2Graph(sys.argv[1])
     return 
 
-def Binary2ImgGlcmGraph(file):
+def Data2Graph(folder):
     """modifiche da fare: get the filename and replace the output
        . 1 provare a convertire tutti i file in una cartella e salvarli in formato hdf5
        
     """
-    converter = BinaryPairListConverter(file)
-    pairs = converter.bin2pair()
-    arrtograph = PairListToGraph(pairs)
-    G = arrtograph.pair2graph()
-    print(G.number_of_edges())
-    c_graph, c_nodes = nx.dedensify(G, threshold=2)
-    print(c_graph.number_of_edges())
-    nx.write_gexf(c_graph, "file.gexf")
+    list_files=os.listdir(folder)
+    # Loop through each file
+    for file in list_files:
+        converter = Binary2Graph(file)
+        graph_ = converter.bin2graph()
+       
     
 
 if __name__ == '__main__':
