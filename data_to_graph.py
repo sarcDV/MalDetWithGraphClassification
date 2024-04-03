@@ -1,6 +1,7 @@
 import os, sys
 import numpy as np 
 import networkx as nx
+import pandas as pd
 import h5py
 import  warnings
 warnings.filterwarnings('ignore')
@@ -49,17 +50,18 @@ class Binary2Graph:
         return c_graph
 
 def main():
-    Data2Graph(sys.argv[1])
+    Data2Graph(sys.argv[1], sys.argv[2])
     return 
 
-def Data2Graph(folder):
+def Data2Graph(folder, csvfile):
     """
     Modifications to be made:
-    1. ...
+    1. Convert all files in the folder and save them in HDF5 format.
     """
     list_files = os.listdir(folder)
     path_ = os.path.join(os.getcwd(), os.path.dirname(folder))
-    
+    dflabel = pd.read_csv(csvfile)
+    print(dflabel)
     # Create an HDF5 file to store the data
     hdf5_file = "graph_data.h5"
     with h5py.File(hdf5_file, "a") as f:
@@ -73,15 +75,25 @@ def Data2Graph(folder):
             converter = Binary2Graph(file_)
             graph_ = converter.bin2graph()
             tdf = nx.to_pandas_edgelist(graph_)
+            
             # Filter rows where any element (string) has length > 3
             tdf = tdf[tdf.applymap(lambda x: len(x) <= 3 if isinstance(x, str) else True).all(axis=1)]
-            # # Convert columns to appropriate data types
+    
+            # Convert columns to appropriate data types
             tdf["source"] = tdf["source"].astype("uint8")
             tdf["target"] = tdf["target"].astype("uint8")
+            
             # Append tdf to the HDF5 file
             group_name = os.path.splitext(filename)[0]
             f.create_group(group_name)
             f[group_name].create_dataset("tdf", data=tdf.to_records(index=False))
+            
+            # Add label to the group based on filename matching with dflabel
+            matching_row = dflabel[dflabel["id"] == filename]
+            if not matching_row.empty:
+                list_value = matching_row["list"].iloc[0]
+                label = 0 if list_value.lower() in ["whitelist", "whitelist"] else 1
+                f[group_name].attrs["label"] = label
 
     print(f"All data saved to {hdf5_file}")
 
