@@ -39,7 +39,7 @@ class Binary2Graph:
         self.file = file
 
     def bin2graph(self):
-        converter = BinaryPairListConverter(file)
+        converter = BinaryPairListConverter(self.file)
         pairs = converter.bin2pair()
         arrtograph = PairListToGraph(pairs)
         G = arrtograph.pair2graph()
@@ -56,11 +56,13 @@ def Data2Graph(folder):
        
     """
     list_files=os.listdir(folder)
+    path_ = os.path.join(os.getcwd(), os.path.dirname(folder))
     # Loop through each file
     for file in list_files:
+        file_ = os.path.join(path_, file)
         # get filename:
-        filename = os.path.basename(file)
-        converter = Binary2Graph(file)
+        filename = os.path.basename(file_)
+        converter = Binary2Graph(file_)
         graph_ = converter.bin2graph()
        
     
