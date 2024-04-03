@@ -81,10 +81,10 @@ def Data2Graph(folder):
     path_ = os.path.join(os.getcwd(), os.path.dirname(folder))
     
     # Create an HDF5 file to store the data
-    # hdf5_file = "all_data.h5"
-    # with h5py.File(hdf5_file, "a") as f:
+    hdf5_file = "all_data.h5"
+    with h5py.File(hdf5_file, "a") as f:
         # Loop through each file
-    for file in list_files:
+        for file in list_files:
             file_ = os.path.join(path_, file)
             filename = os.path.basename(file_)
             print(f"Processing {filename}")
@@ -93,20 +93,25 @@ def Data2Graph(folder):
             converter = Binary2Graph(file_)
             graph_ = converter.bin2graph()
             # print(graph_)
-            tdf = nx.to_pandas_edgelist(graph_, dtype="uint8")
+            tdf = nx.to_pandas_edgelist(graph_)
+            
+            # Filter rows where any element (string) has length > 3
+            # filtered_df = df[df.applymap(lambda x: len(x) <= 3 if isinstance(x, str) else True).all(axis=1)]
+            tdf = tdf[tdf.applymap(lambda x: len(x) <= 3 if isinstance(x, str) else True).all(axis=1)]
+            # print(tdf)
             # tdf = tdf[tdf.lt(257).all(axis=1)]  
             # # Convert columns to appropriate data types
-            # tdf["source"] = tdf["source"].astype("uint8")
-            # tdf["target"] = tdf["target"].astype("uint8")
+            tdf["source"] = tdf["source"].astype("uint8")
+            tdf["target"] = tdf["target"].astype("uint8")
             # print(tdf)
             # # tdf["weight"] = tdf["weight"].astype("float64")
             
             # # Append tdf to the HDF5 file
-            # group_name = os.path.splitext(filename)[0]
-            # f.create_group(group_name)
-            # f[group_name].create_dataset("tdf", data=tdf.to_records(index=False))
+            group_name = os.path.splitext(filename)[0]
+            f.create_group(group_name)
+            f[group_name].create_dataset("tdf", data=tdf.to_records(index=False))
 
-    # print(f"All data saved to {hdf5_file}")
+    print(f"All data saved to {hdf5_file}")
 
 if __name__ == '__main__':
         main()
