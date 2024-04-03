@@ -66,6 +66,8 @@ def Data2Graph(folder):
     list_files=os.listdir(folder)
     # Loop through each file
     for file in list_files:
+        # get filename:
+        filename = os.path.basename(file)
         converter = Binary2Graph(file)
         graph_ = converter.bin2graph()
        
