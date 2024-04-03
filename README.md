@@ -5,6 +5,6 @@
  
 - convert data to graph and store in hdf5 file:
   * bash
-python data_to_graph.py input_folder
+    python data_to_graph.py input_folder
 
   
