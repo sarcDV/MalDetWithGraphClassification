@@ -19,6 +19,7 @@ class BinaryPairListConverter:
 
         # Reshape the array to have 2 rows and N columns
         # d = d.reshape(-1, int(len(d) / 2))
+        # Reshape the array to have 2 columns and N rows
         d = d.reshape(int(len(d) / 2), -1)
         return d
     
@@ -51,37 +52,16 @@ def main():
     Data2Graph(sys.argv[1])
     return 
 
-# def Data2Graph(folder):
-#     """modifiche da fare: get the filename and replace the output
-#        . 1 provare a convertire tutti i file in una cartella e salvarli in formato hdf5
-       
-#     """
-#     list_files=os.listdir(folder)
-#     path_ = os.path.join(os.getcwd(), os.path.dirname(folder))
-#     # Loop through each file
-#     for file in list_files:
-#         file_ = os.path.join(path_, file)
-#         # get filename:
-#         filename = os.path.basename(file_)
-#         print(filename)
-#         converter = Binary2Graph(file_)
-#         graph_ = converter.bin2graph()
-#         # nx.write_gexf(graph_, file_+'_original.gexf')
-#         # convert to dataframe
-#         tdf = nx.to_pandas_edgelist(graph_)
-#         print(tdf)
-#         # ngraph_ = nx.from_pandas_edgelist(tdf)#, source='source', target='target')
-#         # nx.write_gexf(ngraph_, file_+'_pdataframe.gexf')
 def Data2Graph(folder):
     """
     Modifications to be made:
-    1. Convert all files in the folder and save them in HDF5 format.
+    1. ...
     """
     list_files = os.listdir(folder)
     path_ = os.path.join(os.getcwd(), os.path.dirname(folder))
     
     # Create an HDF5 file to store the data
-    hdf5_file = "all_data.h5"
+    hdf5_file = "graph_data.h5"
     with h5py.File(hdf5_file, "a") as f:
         # Loop through each file
         for file in list_files:
@@ -92,21 +72,13 @@ def Data2Graph(folder):
             # Convert binary data to graph
             converter = Binary2Graph(file_)
             graph_ = converter.bin2graph()
-            # print(graph_)
             tdf = nx.to_pandas_edgelist(graph_)
-            
             # Filter rows where any element (string) has length > 3
-            # filtered_df = df[df.applymap(lambda x: len(x) <= 3 if isinstance(x, str) else True).all(axis=1)]
             tdf = tdf[tdf.applymap(lambda x: len(x) <= 3 if isinstance(x, str) else True).all(axis=1)]
-            # print(tdf)
-            # tdf = tdf[tdf.lt(257).all(axis=1)]  
             # # Convert columns to appropriate data types
             tdf["source"] = tdf["source"].astype("uint8")
             tdf["target"] = tdf["target"].astype("uint8")
-            # print(tdf)
-            # # tdf["weight"] = tdf["weight"].astype("float64")
-            
-            # # Append tdf to the HDF5 file
+            # Append tdf to the HDF5 file
             group_name = os.path.splitext(filename)[0]
             f.create_group(group_name)
             f[group_name].create_dataset("tdf", data=tdf.to_records(index=False))
