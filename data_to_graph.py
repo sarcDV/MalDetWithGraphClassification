@@ -1,12 +1,7 @@
 import os, sys, glob, shutil
-
 import numpy as np 
-from math import ceil, sqrt
-from skimage.feature import graycomatrix
-import  warnings
 import networkx as nx
-import matplotlib.pyplot as plt
-
+import  warnings
 warnings.filterwarnings('ignore')
 ## ---------------------------------------------------
 class BinaryPairListConverter:
@@ -48,10 +43,7 @@ class Binary2Graph:
         pairs = converter.bin2pair()
         arrtograph = PairListToGraph(pairs)
         G = arrtograph.pair2graph()
-        # print(G.number_of_edges())
         c_graph, c_nodes = nx.dedensify(G, threshold=2)
-        # print(c_graph.number_of_edges())
-        # nx.write_gexf(c_graph, "file.gexf")
         return c_graph
 
 def main():
